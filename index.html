@@ -2,137 +2,336 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Weekly Roadmap Planner</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f5f7fa;
-        margin: 0;
+    :root {
+        --primary: #6366f1;
+        --primary-light: #818cf8;
+        --primary-dark: #4f46e5;
+        --secondary: #f43f5e;
+        --secondary-light: #fb7185;
+        --background: #f8fafc;
+        --surface: #ffffff;
+        --text: #1e293b;
+        --text-light: #64748b;
+        --border: #e2e8f0;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --radius: 12px;
+        --radius-sm: 8px;
+        --transition: all 0.3s ease;
     }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: var(--background);
+        color: var(--text);
+        line-height: 1.5;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
     header {
-        background: #4a6cf7;
-        padding: 20px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        padding: 20px 16px;
         text-align: center;
         color: white;
-        font-size: 22px;
-        font-weight: bold;
+        font-size: 20px;
+        font-weight: 700;
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
+
     .day-tabs {
         display: flex;
         overflow-x: auto;
-        background: white;
-        border-bottom: 1px solid #ddd;
-    }
-    .tab {
-        flex: 1;
-        text-align: center;
-        padding: 12px;
-        cursor: pointer;
-        font-weight: bold;
-        color: #444;
-    }
-    .tab.active {
-        background: #4a6cf7;
-        color: white;
-    }
-    .container {
-        padding: 18px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 0 8px;
+        position: sticky;
+        top: 60px;
+        z-index: 9;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
 
-    /* Zoom Buttons */
+    .day-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tab {
+        flex: 0 0 auto;
+        text-align: center;
+        padding: 14px 16px;
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--text-light);
+        border-bottom: 3px solid transparent;
+        transition: var(--transition);
+        white-space: nowrap;
+    }
+
+    .tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+    }
+
+    .container {
+        padding: 20px 16px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    /* Zoom Controls */
     .zoom-controls {
         display: flex;
         justify-content: flex-end;
-        gap: 10px;
-        margin-bottom: 10px;
+        gap: 12px;
+        margin-bottom: 20px;
     }
+
     .zoom-btn {
-        padding: 6px 12px;
-        background: #4a6cf7;
-        border: none;
-        color: white;
-        border-radius: 6px;
+        padding: 10px 16px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: var(--radius-sm);
         cursor: pointer;
         font-size: 16px;
+        font-weight: 600;
+        transition: var(--transition);
+        box-shadow: var(--shadow);
+    }
+
+    .zoom-btn:active {
+        transform: scale(0.95);
+    }
+
+    /* Input Section */
+    .input-section {
+        background: var(--surface);
+        padding: 20px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 24px;
+    }
+
+    #inputBox {
+        width: 100%;
+        padding: 16px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        margin-bottom: 16px;
+        font-size: 16px;
+        transition: var(--transition);
+        background: var(--background);
+    }
+
+    #inputBox:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    #addBtn {
+        width: 100%;
+        padding: 16px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: var(--transition);
+        box-shadow: var(--shadow);
+    }
+
+    #addBtn:active {
+        background: var(--primary-dark);
+        transform: translateY(1px);
     }
 
     /* Timeline */
     .timeline {
         position: relative;
         margin: 20px 0;
-        padding-left: 20px;
-        border-left: 3px solid #4a6cf7;
+        padding-left: 24px;
     }
+
+    .timeline::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 12px;
+        width: 2px;
+        background: var(--primary-light);
+        border-radius: 2px;
+    }
+
     .item {
         margin-bottom: 20px;
         position: relative;
         cursor: pointer;
     }
+
     .item::before {
         content: "";
-        width: 14px;
-        height: 14px;
-        background: #4a6cf7;
+        width: 16px;
+        height: 16px;
+        background: var(--surface);
+        border: 3px solid var(--primary);
         border-radius: 50%;
         position: absolute;
-        left: -9px;
-        top: 5px;
+        left: -24px;
+        top: 8px;
+        z-index: 2;
+        transition: var(--transition);
     }
+
     .item-box {
-        padding: 10px 14px;
-        background: white;
-        border-radius: 6px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        padding: 16px;
+        background: var(--surface);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        transition: 0.2s;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .item-box::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 4px;
+        background: var(--primary);
+        transition: var(--transition);
+    }
+
+    .item-box:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
     }
 
     /* Completed item */
-    .completed {
-        opacity: 0.4;
+    .completed .item-box::before {
+        background: #10b981;
+    }
+
+    .completed .item-box {
+        opacity: 0.7;
+    }
+
+    .completed .item-text {
         text-decoration: line-through;
+        color: var(--text-light);
+    }
+
+    .item-text {
+        flex: 1;
+        margin-right: 12px;
+        font-weight: 500;
     }
 
     .delete-btn {
-        background: red;
+        background: var(--secondary);
         color: white;
         border: none;
-        padding: 4px 10px;
-        border-radius: 4px;
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
         cursor: pointer;
+        font-weight: 600;
+        transition: var(--transition);
+        flex-shrink: 0;
     }
 
-    #inputBox {
-        width: 100%;
-        padding: 12px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        margin-bottom: 10px;
-    }
-    #addBtn {
-        width: 100%;
-        padding: 12px;
-        background: #4a6cf7;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 16px;
+    .delete-btn:active {
+        background: var(--secondary-light);
+        transform: scale(0.95);
     }
 
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-light);
+    }
+
+    .empty-state svg {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    /* Clear All Button */
     #clearAllBtn {
         width: 100%;
-        padding: 12px;
-        margin-top: 20px;
-        background: #e63946;
-        color: white;
-        border: none;
-        border-radius: 6px;
+        padding: 16px;
+        margin-top: 24px;
+        background: var(--surface);
+        color: var(--secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
         cursor: pointer;
         font-size: 16px;
-        font-weight: bold;
+        font-weight: 600;
+        transition: var(--transition);
+        box-shadow: var(--shadow);
+    }
+
+    #clearAllBtn:active {
+        background: #fef2f2;
+        transform: translateY(1px);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+        .container {
+            padding: 16px 12px;
+        }
+        
+        .input-section {
+            padding: 16px;
+        }
+        
+        .tab {
+            padding: 12px 14px;
+            font-size: 14px;
+        }
+        
+        .item-box {
+            padding: 14px;
+        }
+        
+        .zoom-btn {
+            padding: 8px 14px;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .day-tabs {
+            justify-content: center;
+        }
+        
+        .tab {
+            flex: 1;
+            max-width: 120px;
+        }
     }
 </style>
 </head>
@@ -158,8 +357,10 @@
         <button class="zoom-btn" onclick="zoomIn()">A+</button>
     </div>
 
-    <input id="inputBox" placeholder="Enter a location...">
-    <button id="addBtn" onclick="addPlace()">Add to Roadmap</button>
+    <div class="input-section">
+        <input id="inputBox" placeholder="Enter a location...">
+        <button id="addBtn" onclick="addPlace()">Add to Roadmap</button>
+    </div>
 
     <div id="timeline" class="timeline"></div>
 
@@ -173,7 +374,7 @@ let fontSize = parseInt(localStorage.getItem("fontSize") || 16);
 /* Apply current font size */
 function applyFontSize() {
     document.documentElement.style.setProperty("--item-font-size", fontSize + "px");
-    document.querySelectorAll(".item-box").forEach(el => {
+    document.querySelectorAll(".item-text").forEach(el => {
         el.style.fontSize = fontSize + "px";
     });
 }
@@ -185,14 +386,22 @@ function loadTimeline() {
     container.innerHTML = "";
 
     if (data.length === 0) {
-        container.innerHTML = "<p style='color:#777;'>No routes added yet.</p>";
+        container.innerHTML = `
+            <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p>No routes added yet.</p>
+            </div>
+        `;
+        return;
     }
 
     data.forEach((item, index) => {
         container.innerHTML += `
-            <div class="item" onclick="toggleComplete(${index})">
-                <div class="item-box ${item.done ? 'completed' : ''}" style="font-size:${fontSize}px">
-                    ${item.text}
+            <div class="item ${item.done ? 'completed' : ''}" onclick="toggleComplete(${index})">
+                <div class="item-box">
+                    <div class="item-text" style="font-size:${fontSize}px">${item.text}</div>
                     <button class="delete-btn" onclick="deletePlace(${index}); event.stopPropagation()">X</button>
                 </div>
             </div>
