@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Weekly Roadmap Planner</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f5f7fa;
+        margin: 0;
+    }
+    header {
+        background: #4a6cf7;
+        padding: 20px;
+        text-align: center;
+        color: white;
+        font-size: 22px;
+        font-weight: bold;
+    }
+    .day-tabs {
+        display: flex;
+        overflow-x: auto;
+        background: white;
+        border-bottom: 1px solid #ddd;
+    }
+    .tab {
+        flex: 1;
+        text-align: center;
+        padding: 12px;
+        cursor: pointer;
+        font-weight: bold;
+        color: #444;
+    }
+    .tab.active {
+        background: #4a6cf7;
+        color: white;
+    }
+    .container {
+        padding: 18px;
+    }
+
+    /* Zoom Buttons */
+    .zoom-controls {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .zoom-btn {
+        padding: 6px 12px;
+        background: #4a6cf7;
+        border: none;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    /* Timeline */
+    .timeline {
+        position: relative;
+        margin: 20px 0;
+        padding-left: 20px;
+        border-left: 3px solid #4a6cf7;
+    }
+    .item {
+        margin-bottom: 20px;
+        position: relative;
+        cursor: pointer;
+    }
+    .item::before {
+        content: "";
+        width: 14px;
+        height: 14px;
+        background: #4a6cf7;
+        border-radius: 50%;
+        position: absolute;
+        left: -9px;
+        top: 5px;
+    }
+    .item-box {
+        padding: 10px 14px;
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: 0.2s;
+    }
+
+    /* Completed item */
+    .completed {
+        opacity: 0.4;
+        text-decoration: line-through;
+    }
+
+    .delete-btn {
+        background: red;
+        color: white;
+        border: none;
+        padding: 4px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    #inputBox {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+    }
+    #addBtn {
+        width: 100%;
+        padding: 12px;
+        background: #4a6cf7;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    #clearAllBtn {
+        width: 100%;
+        padding: 12px;
+        margin-top: 20px;
+        background: #e63946;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+    }
+</style>
+</head>
+
+<body>
+
+<header>Weekly Roadmap Planner</header>
+
+<div class="day-tabs">
+    <div class="tab active" onclick="switchDay('Monday')">Monday</div>
+    <div class="tab" onclick="switchDay('Tuesday')">Tuesday</div>
+    <div class="tab" onclick="switchDay('Wednesday')">Wednesday</div>
+    <div class="tab" onclick="switchDay('Thursday')">Thursday</div>
+    <div class="tab" onclick="switchDay('Friday')">Friday</div>
+    <div class="tab" onclick="switchDay('Saturday')">Saturday</div>
+</div>
+
+<div class="container">
+
+    <!-- Zoom Buttons -->
+    <div class="zoom-controls">
+        <button class="zoom-btn" onclick="zoomOut()">A-</button>
+        <button class="zoom-btn" onclick="zoomIn()">A+</button>
+    </div>
+
+    <input id="inputBox" placeholder="Enter a location...">
+    <button id="addBtn" onclick="addPlace()">Add to Roadmap</button>
+
+    <div id="timeline" class="timeline"></div>
+
+    <button id="clearAllBtn" onclick="clearAll()">Clear All Routes</button>
+</div>
+
+<script>
+let currentDay = "Monday";
+let fontSize = parseInt(localStorage.getItem("fontSize") || 16);
+
+/* Apply current font size */
+function applyFontSize() {
+    document.documentElement.style.setProperty("--item-font-size", fontSize + "px");
+    document.querySelectorAll(".item-box").forEach(el => {
+        el.style.fontSize = fontSize + "px";
+    });
+}
+
+/* Load routes */
+function loadTimeline() {
+    let data = JSON.parse(localStorage.getItem(currentDay) || "[]");
+    let container = document.getElementById("timeline");
+    container.innerHTML = "";
+
+    if (data.length === 0) {
+        container.innerHTML = "<p style='color:#777;'>No routes added yet.</p>";
+    }
+
+    data.forEach((item, index) => {
+        container.innerHTML += `
+            <div class="item" onclick="toggleComplete(${index})">
+                <div class="item-box ${item.done ? 'completed' : ''}" style="font-size:${fontSize}px">
+                    ${item.text}
+                    <button class="delete-btn" onclick="deletePlace(${index}); event.stopPropagation()">X</button>
+                </div>
+            </div>
+        `;
+    });
+
+    applyFontSize();
+}
+
+/* Switch day */
+function switchDay(day) {
+    currentDay = day;
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    event.target.classList.add("active");
+    loadTimeline();
+}
+
+/* Add place */
+function addPlace() {
+    let text = document.getElementById("inputBox").value.trim();
+    if (!text) return;
+
+    let data = JSON.parse(localStorage.getItem(currentDay) || "[]");
+    data.push({ text: text, done: false });
+
+    localStorage.setItem(currentDay, JSON.stringify(data));
+
+    document.getElementById("inputBox").value = "";
+    loadTimeline();
+}
+
+/* Toggle completed */
+function toggleComplete(i) {
+    let data = JSON.parse(localStorage.getItem(currentDay) || "[]");
+    data[i].done = !data[i].done;
+    localStorage.setItem(currentDay, JSON.stringify(data));
+    loadTimeline();
+}
+
+/* Delete one */
+function deletePlace(i) {
+    let data = JSON.parse(localStorage.getItem(currentDay) || "[]");
+    data.splice(i, 1);
+    localStorage.setItem(currentDay, JSON.stringify(data));
+    loadTimeline();
+}
+
+/* Clear day */
+function clearAll() {
+    if (confirm("Clear all routes for " + currentDay + "?")) {
+        localStorage.setItem(currentDay, JSON.stringify([]));
+        loadTimeline();
+    }
+}
+
+/* Zoom Controls */
+function zoomIn() {
+    fontSize += 2;
+    localStorage.setItem("fontSize", fontSize);
+    applyFontSize();
+}
+
+function zoomOut() {
+    if (fontSize > 10) fontSize -= 2;
+    localStorage.setItem("fontSize", fontSize);
+    applyFontSize();
+}
+
+loadTimeline();
+</script>
+
+</body>
+</html>
